@@ -1,0 +1,60 @@
+services:
+  mysql-master:
+    container_name: mysql-master
+    build:
+      context: ./
+      dockerfile: ./mysql-dockerfile/master/Dockerfile
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: "x2bee_main"
+      MYSQL_USER: "x2bee_main"
+      MYSQL_PASSWORD: "x2bee_main12#$"
+      MYSQL_ROOT_PASSWORD: "x2bee_main12#$"
+
+    ports:
+      - "3316:3306"
+    volumes:
+      - mysql_data_m:/var/lib/mysql
+      - mysql_data_m:/var/lib/mysql-files
+    networks:
+      - net-mysql
+
+  mysql-slave:
+    container_name: mysql-slave
+    build:
+      context: ./
+      dockerfile: ./mysql-dockerfile/slave/Dockerfile
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: "x2bee_main"
+      MYSQL_USER: "x2bee_main"
+      MYSQL_PASSWORD: "x2bee_main12#$"
+      MYSQL_ROOT_PASSWORD: "x2bee_main12#$"
+    ports:
+      - "3317:3306"
+    volumes:
+      - mysql_data_s:/var/lib/mysql
+      - mysql_data_s:/var/lib/mysql-files
+    networks:
+      - net-mysql
+
+volumes:
+  mysql_data_m:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/mysql_data/master
+
+  mysql_data_s:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/mysql_data/slave
+
+networks:
+  net-mysql:
+    driver: bridge

@@ -1,0 +1,41 @@
+version: "3.4"
+services:
+  web:
+    image: "gitlab/gitlab-ce:13.10.0-ce.0"
+    depends_on:
+      - redis
+      - postgresql
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        postgresql['enable'] = false
+        gitlab_rails['db_username'] = "gitlab"
+        gitlab_rails['db_password'] = "gitlab"
+        gitlab_rails['db_host'] = "postgresql"
+        gitlab_rails['db_database'] = "gitlabhq_production"
+        gitlab_rails['db_adapter'] = 'postgresql'
+        gitlab_rails['db_encoding'] = 'utf8'
+        redis['enable'] = false
+        gitlab_rails['redis_host'] = 'redis'
+        gitlab_rails['redis_port'] = '6379'
+        #external_url 'http://localhost'
+        external_url 'http://gitlab-stg.x2bee.com'
+    ports:
+      - "4000:80"
+      - "443:443"
+    volumes:
+      - "./data/gitlab/config:/etc/gitlab"
+      - "./data/gitlab/logs:/var/log/gitlab"
+      - "./data/gitlab/data:/var/opt/gitlab"
+      - "./data/gitlab/backup:/var/opt/gitlab/backups"
+
+  postgresql:
+    image: postgres:12
+    environment:
+      - POSTGRES_USER=gitlab
+      - POSTGRES_PASSWORD=gitlab
+      - POSTGRES_DB=gitlabhq_production
+  redis:
+    image: redis:5
+volumes:
+  gitlab_config:
+  gitlab_backup:

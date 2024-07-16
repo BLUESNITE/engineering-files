@@ -1,0 +1,48 @@
+services:
+  mysql-master:
+    container_name: mysql-master
+    image: "bitnami/mysql:latest"
+    ports:
+      - "3306"
+      - "3316:3306"
+    volumes:
+      - mysql_main_data:/bitnami/mysql/data
+    environment:
+      - MYSQL_REPLICATION_MODE=master
+      - MYSQL_REPLICATION_USER=x2bee
+      - MYSQL_REPLICATION_PASSWORD=X2commerce!1
+      - MYSQL_ROOT_PASSWORD=X2commerce!1
+      - MYSQL_USER=x2bee_main
+      - MYSQL_PASSWORD=x2bee_main12#$
+      - MYSQL_DATABASE=x2bee_main
+    networks:
+      - net-mysql
+
+  mysql-slave:
+    #container_name: mysql-slave
+    image: "bitnami/mysql:latest"
+    ports:
+      - "3306"
+    depends_on:
+      - mysql-master
+    environment:
+      - MYSQL_REPLICATION_MODE=slave
+      - MYSQL_REPLICATION_USER=x2bee
+      - MYSQL_REPLICATION_PASSWORD=X2commerce!1
+      - MYSQL_MASTER_HOST=mysql-master
+      - MYSQL_MASTER_PORT_NUMBER=3306
+      - MYSQL_MASTER_ROOT_PASSWORD=X2commerce!1
+    networks:
+      - net-mysql
+
+volumes:
+  mysql_main_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/mysql-data-bit
+
+networks:
+  net-mysql:
+    driver: bridge

@@ -1,0 +1,14 @@
+services:
+  cronicle:
+    image: javanile/cronicle:latest
+    container_name: cronicle
+    hostname:
+      localhost
+      #- 192.168.2.246
+      #- "cronicle-stg.x2bee.com"
+    user: "root"
+    ports:
+      - "8086:3012"
+    volumes:
+      - /data/cronicle-data/data:/opt/cronicle/data:rw
+      - /data/cronicle-data/logs:/opt/cronicle/logs:rw

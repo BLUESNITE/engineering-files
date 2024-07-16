@@ -1,0 +1,34 @@
+# 빌드방법
+# docker compose -f mysql-compose.yml up --detach --scale mysql-master=1 --scale mysql-slave=3
+services:
+  mysql-master:
+    container_name: mysql-master
+    image: "bitnami/mysql:latest"
+    ports:
+      - "3306"
+      - "3316:3306"
+        #volumes:
+      #- /data/bitnami-mysql-data:/bitnami/mysql/data
+      #- /data/mysql-data:/bitnami/mysql/data
+    environment:
+      - MYSQL_REPLICATION_MODE=master
+      - MYSQL_REPLICATION_USER=x2bee
+      - MYSQL_REPLICATION_PASSWORD=X2commerce!1
+      - MYSQL_ROOT_PASSWORD=X2commerce!1
+      - MYSQL_USER=x2bee_main
+      - MYSQL_PASSWORD=x2bee_main12#$
+      - MYSQL_DATABASE=x2bee_main
+  mysql-slave:
+    #container_name: mysql-slave
+    image: "bitnami/mysql:latest"
+    ports:
+      - "3306"
+    depends_on:
+      - mysql-master
+    environment:
+      - MYSQL_REPLICATION_MODE=slave
+      - MYSQL_REPLICATION_USER=x2bee
+      - MYSQL_REPLICATION_PASSWORD=X2commerce!1
+      - MYSQL_MASTER_HOST=mysql-master
+      - MYSQL_MASTER_PORT_NUMBER=3306
+      - MYSQL_MASTER_ROOT_PASSWORD=X2commerce!1

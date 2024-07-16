@@ -1,0 +1,41 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:jdk17
+    depends_on:
+      - node
+    restart: always
+    user: root
+    container_name: jenkins
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - "/data/jenkins/jenkins_home:/var/jenkins_home"
+      - "/usr/local/bin/helm:/usr/local/bin/helm"
+      - "/usr/bin/argocd:/usr/bin/argocd"
+      - "/usr/bin/docker:/usr/bin/docker"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: "4g"
+        reservations:
+          cpus: "1.0"
+          memory: "2g"
+  node:
+    container_name: jenkins-slave01
+    image: jenkins/ssh-agent:latest-jdk17
+    restart: unless-stopped
+    user: root
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC5g/BF8AR9sOlv5VurbMduq1WDSmwwaaDGF34HQeb7gBVjqKU+CEARsTFWXp6+f+G2dU3q46YCN0yKk5WFBIJHQDyCE76mhAAljLNKBAKy4tj8njBJWek12SMT5UIWt48jSEpiOzUG3tuO6fsXjE9Abve5+RLt2f0GkYz9JCgrgaByBeOj9bR2/iBhqY5KoVHD0PkCtAaUn7mAEntvC8TUZIwYGhNHmPC5YtTLbMy8CGo5rVv4JxASQbYY2f9SgUqESG6QqTA9klRq4N9pL1VPySZaHbXwWD2Ppi+THLxe+MNl8h8SMWk40lD8qa3nDzOmgeaEUL3MDfT1ZVpsSaVQVw3I8UGOx/hCIGyVeVgqLhLc1G+Y0sBoiq4dyT/KeBvfY8xcLub8Jg/u/Lj/04M5ntQOm1mhYmvHk01F3AMabISyrutO9QsXA+Q27rqMWXSl9LZVEEsYojNwuvGZbKFuy1yWlYrfQbBTtiCDS1eIGLupjQInbXn//ywBMjBQON0= root@b2871f60ac57
+    volumes:
+      - "/data/jenkins/jenkins_slave_home:/var/jenkins_home"
+    entrypoint: >
+      sh -c "
+      chown -R jenkins:jenkins /var/jenkins_home &&
+      chmod -R 755 /var/jenkins_home &&
+      setup-sshd"

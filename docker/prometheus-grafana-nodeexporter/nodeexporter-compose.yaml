@@ -1,0 +1,24 @@
+# 권한체크
+# sudo chmod -R 777 /data/prometheus-grafana-nodeexporter/prometheus
+# sudo chmod -R 777 /data/prometheus-grafana-nodeexporter/grafana
+networks:
+  monitor-net:
+    driver: bridge
+
+services:
+  node_exporter:
+    container_name: node_exporter
+    image: bitnami/node-exporter:latest #bitnami/node-exporter:latest prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    ports:
+      - "9100:9100"
+    networks:
+      - monitor-net

@@ -1,0 +1,53 @@
+services:
+  # master
+  postgresql-master:
+    container_name: postgresql-master
+    image: "bitnami/postgresql:latest"
+    ports:
+      - "5442:5432"
+    restart: on-failure
+    user: "root"
+    volumes:
+      - postgresql_main_data:/bitnami/postgresql/data
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=x2bee
+      - POSTGRESQL_REPLICATION_PASSWORD=X2commerce!1
+      - POSTGRESQL_USERNAME=x2bee_main
+      - POSTGRESQL_PASSWORD=x2bee_main12#$
+      - POSTGRESQL_DATABASE=x2bee_main
+    networks:
+      - net-postgresql
+
+  # slave readonly
+  postgresql-slave:
+    container_name: postgresql-slave
+    image: "bitnami/postgresql:latest"
+    ports:
+      - "5443:5432"
+    restart: on-failure
+    user: "root"
+    depends_on:
+      - postgresql-master
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=x2bee
+      - POSTGRESQL_REPLICATION_PASSWORD=X2commerce!1
+      - POSTGRESQL_MASTER_HOST=postgresql-master
+      - POSTGRESQL_MASTER_PORT_NUMBER=5432
+      - POSTGRESQL_USERNAME=x2bee_main
+      - POSTGRESQL_PASSWORD=x2bee_main12#$
+    networks:
+      - net-postgresql
+
+volumes:
+  postgresql_main_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/postgres-data-bit
+
+networks:
+  net-postgresql:
+    driver: bridge

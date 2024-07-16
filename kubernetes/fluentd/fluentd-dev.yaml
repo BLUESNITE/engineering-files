@@ -1,0 +1,182 @@
+---
+#
+# 정확한 작성 방법은 모르나 아래 도메인만 수정하여 배포진행
+# replace opensearch-board-dev.x2bee.com
+# opensearch-board-dev.x2bee.com
+# data에 username, password / base64
+# 참고 URL https://www.base64decode.org/
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: logging
+  labels:
+    k8s-app: fluentd-logging
+data:
+  fluent.conf: |
+    # Prevent fluentd from handling records containing its own logs. Otherwise
+    # it can lead to an infinite loop, when error in sending one message generates
+    # another message which also fails to be sent and so on.
+    <match fluent.**>
+      type null
+    </match>
+    <source>
+      @type tcp
+      port 24220
+      format json
+      tag applog
+    </source>
+    <match applog>
+      @type rewrite_tag_filter
+      <rule>
+        key project
+        pattern ^(.+)$
+        tag $1.${tag}
+      </rule>
+    </match>
+
+    <match **applog**>
+      @type copy
+      <store>
+        @type opensearch
+        hosts https://opensearch-dev.x2bee.com
+        scheme "#{ENV['FLUENT_ELASTICSEARCH_SCHEME'] || 'http'}"
+        ssl_verify "#{ENV['FLUENT_ELASTICSEARCH_SSL_VERIFY'] || 'true'}"
+        ssl_version "#{ENV['FLUENT_ELASTICSEARCH_SSL_VERSION'] || 'TLSv1_2'}"
+        user "#{ENV['FLUENT_ELASTICSEARCH_USER'] || use_default}"
+        password "#{ENV['FLUENT_ELASTICSEARCH_PASSWORD'] || use_default}"        
+        reload_connections false
+        reconnect_on_error true
+        reload_on_failure true
+        log_es_400_reason true
+        logstash_format true
+        logstash_prefix ${tag}
+        logstash_dateformat %Y%m%d
+        include_tag_key true
+        tag_key @log_name
+        request_timeout 30000s
+        slow_flush_log_threshold 300.0
+        flush_mode interval
+        <buffer>
+          flush_thread_count "8"
+          flush_interval "10s"
+          chunk_limit_size "5M"
+          queue_limit_length "512"
+          retry_max_interval "30"
+          retry_forever true
+        </buffer>
+      </store>
+    </match>
+  config-copy.sh: |
+    #!/bin/sh
+    cp -a /config-volume/..data/fluent.conf /fluentd/etc/fluent.conf
+    tini -- /fluentd/entrypoint.sh
+    # cp -a /config-volume/..data/fluent.conf /opt/bitnami/fluentd/conf
+    # /opt/bitnami/ruby/bin/ruby /opt/bitnami/fluentd/bin/fluentd --config /opt/bitnami/fluentd/conf/fluentd.conf --plugin /opt/bitnami/fluentd/plugins
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fluentd
+  namespace: logging
+  labels:
+    k8s-app: fluentd-logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: fluentd-logging
+  template:
+    metadata:
+      labels:
+        k8s-app: fluentd-logging
+    spec:
+      ##affinity:
+      ##  nodeAffinity:
+      ##    requiredDuringSchedulingIgnoredDuringExecution:
+      ##      nodeSelectorTerms:
+      ##        - matchExpressions:
+      ##            - key: node-group
+      ##              operator: In
+      ##              values:
+      ##                - mgmt
+      containers:
+        - name: fluentd
+          command: ["sh", "-c", "/config-volume/..data/config-copy.sh"]
+          image: fluent/fluentd-kubernetes-daemonset:v1.16-debian-opensearch-1
+          env:
+            - name: FLUENT_ELASTICSEARCH_HOST
+              value: "opensearch-dev.x2bee.com"
+            - name: FLUENT_ELASTICSEARCH_PORT
+              value: "443"
+            - name: FLUENT_ELASTICSEARCH_SCHEME
+              value: "https"
+            - name: FLUENTD_SYSTEMD_CONF
+              value: "disable"
+            - name: FLUENT_UID
+              value: "0"
+            - name: FLUENT_ELASTICSEARCH_SSL_VERIFY
+              value: "false"
+            # Option to configure elasticsearch plugin with tls
+            # ================================================================
+            - name: FLUENT_ELASTICSEARCH_SSL_VERSION
+              value: "TLSv1_2"
+            # X-Pack Authentication
+            # =====================
+            - name: FLUENT_ELASTICSEARCH_USER
+              valueFrom:
+                secretKeyRef:
+                  name: opensearch-credentials
+                  key: username
+            - name: FLUENT_ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: opensearch-credentials
+                  key: password
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          ports:
+            - name: fluentd-source
+              containerPort: 24220
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config-volume
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: config-volume
+          configMap:
+            name: fluentd-config
+            defaultMode: 0777
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fluentd-svc
+  namespace: logging
+  labels:
+    k8s-app: fluentd-logging
+spec:
+  type: ClusterIP
+  selector:
+    k8s-app: fluentd-logging
+  ports:
+    - name: fluentd-source
+      port: 24220
+      targetPort: fluentd-source
+      protocol: TCP
+---
+apiVersion: v1
+data:
+  username: YWRtaW4= # admin
+  password: WDJjb21tZXJjZSEx # WDJjb21tZXJjZSEx
+kind: Secret
+metadata:
+  name: opensearch-credentials
+  namespace: logging

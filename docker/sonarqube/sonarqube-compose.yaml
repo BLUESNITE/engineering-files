@@ -1,0 +1,56 @@
+services:
+  sonarqube-postgresql:
+    container_name: sonarqube-postgresql
+    image: docker.io/bitnami/postgresql:16.3.0
+    ports:
+      - "5432"
+    volumes:
+      - "postgresql_data:/bitnami/postgresql"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - POSTGRESQL_USERNAME=sonarqube
+      - POSTGRESQL_DATABASE=sonarqube
+    networks:
+      - net-sonarqube
+
+  # /opt/bitnami/sonarqube/conf sonar.properties t
+  sonarqube:
+    container_name: sonarqube
+    user: "root"
+    image: docker.io/bitnami/sonarqube:10.5.1
+    ports:
+      - "8087:9000"
+      - "8443"
+    volumes:
+      - "sonarqube_data:/bitnami/sonarqube"
+    depends_on:
+      - sonarqube-postgresql
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - SONARQUBE_DATABASE_HOST=sonarqube-postgresql
+      - SONARQUBE_DATABASE_PORT_NUMBER=5432
+      - SONARQUBE_DATABASE_USER=sonarqube
+      - SONARQUBE_DATABASE_NAME=sonarqube
+      - SONARQUBE_MAX_HEAP_SIZE=512m
+      - SONARQUBE_MIN_HEAP_SIZE=512m
+    networks:
+      - net-sonarqube
+
+volumes:
+  postgresql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/sonarqube-data-bit/postgres
+  sonarqube_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/sonarqube-data-bit/sonar
+
+networks:
+  net-sonarqube:
+    driver: bridge

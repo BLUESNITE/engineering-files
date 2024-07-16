@@ -1,0 +1,10 @@
+services:
+  myredis:
+    image: redis
+    container_name: myredis
+    volumes:
+      - /data/redis/conf:/data/redis/conf # 설정 파일 경로 매핑
+      - /data/redis/data:/data/redis/data # 데이터 저장소 경로 매핑
+    command: ["redis-server", "/data/redis/conf"]
+    ports:
+      - "6389:6379"

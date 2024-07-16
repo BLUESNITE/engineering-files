@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 15s
+  evaluation_interval: 2m
+  external_labels:
+    monitor: "codelab-monitor"
+    query_log_file: query_log_file.log
+
+scrape_configs:
+  # prometheus
+  - job_name: "prometheus"
+    scrape_interval: 10s
+    scrape_timeout: 10s
+    metrics_path: "/metrics"
+    scheme: "http"
+    static_configs:
+      - targets: ["prometheus:9090"] # node_exporter:9100
+        labels:
+          service: "monitor"
+
+  # Node Exporter
+  - job_name: "pc-exporter"
+    static_configs:
+      - targets: ["192.168.2.245:9100", "192.168.2.246:9100", "192.168.2.247:9100"]
+
+  # Machine Node Exporter
+  - job_name: "vm-exporter"
+    static_configs:
+      - targets: ["192.168.2.130:9100", "192.168.2.131:9100", "192.168.2.132:9100", "192.168.2.133:9100", "192.168.2.134:9100", "192.168.2.135:9100", "192.168.2.136:9100"]
+
+  # jmx Exporter
+  - job_name: "jmx-exporter"
+    static_configs:
+      - targets: ["192.168.2.130:31760"]
+
+  # app metrics Exporter
+  - job_name: "app-metrics-exporter"
+    metrics_path: "/api/common/management/prometheus"
+    static_configs:
+      - targets: ["api-common-stg.x2bee.com"]

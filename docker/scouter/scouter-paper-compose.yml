@@ -1,0 +1,34 @@
+services:
+  scouter-server:
+    container_name: scouter-server
+    image: scouterapm/scouter-server:2.7.0
+    restart: always
+    environment:
+      - SC_SERVER_ID=SCCOUTER-COLLECTOR
+      - NET_HTTP_SERVER_ENABLED=true
+      - NET_HTTP_API_SWAGGER_ENABLED=true
+      - NET_HTTP_API_ENABLED=true
+      - MGR_PURGE_PROFILE_KEEP_DAYS=2
+      - MGR_PURGE_XLOG_KEEP_DAYS=5
+      - MGR_PURGE_COUNTER_KEEP_DAYS=15
+      - JAVA_OPT=-Xms1024m -Xmx1024m
+      - SCOUTER_PAPER_HOST=scouter-paper
+      - SCOUTER_PAPER_PORT=8088
+    volumes:
+      - /data/scouter-data/logs:/home/scouter-server/logs
+      - /data/scouter-data/sc-data:/home/scouter-server/database
+      - ./scouter-volumes/scouter.conf:/home/scouter-server/conf/scouter.conf
+    ports:
+      - 6180:6180
+      - 6100:6100
+      - 6100:6100/udp
+    depends_on:
+      - scouter-paper
+  scouter-paper:
+    container_name: scouter-paper
+    image: scouterapm/scouter-paper:2.6.4
+    restart: always
+    environment:
+      - SCOUTER_PAPER_HTTP_ENABLED=true
+    ports:
+      - 8088:80

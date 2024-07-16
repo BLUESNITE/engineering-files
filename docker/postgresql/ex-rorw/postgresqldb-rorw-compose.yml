@@ -1,0 +1,40 @@
+services:
+  # master
+  postgresql-master:
+    container_name: postgresql-master
+    image: "bitnami/postgresql:latest"
+    ports:
+      - "5442:5432"
+    restart: on-failure
+    volumes:
+      - postgresql_main_data:/bitnami-postgres-data/postgresql
+      - ./postgresqldb-init-sql/replication-user-grant.sql:/docker-entrypoint-initdb. d/db.sql
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=x2bee
+      - POSTGRESQL_REPLICATION_PASSWORD=X2commerce!1
+      - POSTGRESQL_USERNAME=x2bee_main
+      - POSTGRESQL_PASSWORD=x2bee_main12#$
+      - POSTGRESQL_DATABASE=x2bee_main
+
+  # slave readonly
+  postgesql-slave:
+    container_name: postgesql-slave
+    image: "bitnami/postgresql:latest"
+    ports:
+      - "5443:5432"
+    restart: on-failure
+    depends_on:
+      - postgresql-master
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=x2bee
+      - POSTGRESQL_REPLICATION_PASSWORD=X2commerce!1
+      - POSTGRESQL_MASTER_HOST=postgresql-master
+      - POSTGRESQL_MASTER_PORT_NUMBER=5432
+      - POSTGRESQL_USERNAME=x2bee_main
+      - POSTGRESQL_PASSWORD=x2bee_main12#$
+
+volumes:
+  postgresql_main_data:
+    driver: local

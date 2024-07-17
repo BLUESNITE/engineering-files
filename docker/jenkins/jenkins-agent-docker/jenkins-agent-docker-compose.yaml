@@ -1,0 +1,30 @@
+services:
+  node:
+    container_name: jenkins-slave01
+    image: jenkins/jnlp-agent-docker
+    restart: unless-stopped
+    user: root
+    ports:
+      - "50000:50000"
+      - "8822:22"
+    environment:
+      - ENV_SECRET_FILE=0a278a088584e3dc1c3eefd952bde7e91d5f25b641191955e059d8a1ab2aea68
+      - ENV_SLAVE_NAME=Slave-In Node 1
+      - ENV_HOST_SEVER=192.168.2.246:8081
+      - JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGZU1maHQXSR5jmbDLNdY/fze6Ebw3SBt2u8+T5r8vxPpYXiHwphulhYCf7nUOAH8bVK0aUq0JWwqE5LoPrrSOe4K+etbJjhe+0dWZyyQW51s/aRplMCpNDMDsEF+pQm3jLDRKSMHE2JPvQXxyUG7xCjYda9N7jTrDamlGvvPXuv/XI9y58XnCBtLpnypJWuSNdBrOXt23eNoJKRse8dPmcOYa44QSxeGO+7dPpzE4hjtx6TwWPwr2IO4DQWG/0Ex6S8OpBpMPvWPzDfcv5Jihez2R0Ql+qGfS8vAFU8VbtJATVobI0/iAUE6AStI3ay5gwpUeeba7lu0LKor9Q1KbNGnDlBrEkfxQVkwZGXiqV8uVdmpgSC4RvaD3LWPCI9mOOtz17t4LZvyH/2NVMGBEOU7szNuAx917qpfGMQ2I2+aqzL1YWU2cmZh75NL2OR9S0NYfzqLO/g/J1K6FAeGDR5ipEJS+GALqI78C58NV8a8SOzEMzv97LHr+SvjuGLU= root@8bfb4b4cb0b1
+    volumes:
+      - "./jenkins/node.sh:/node.sh"
+      - "./jenkins/install.sh:/install.sh"
+      - "./jenkins/login.sh:/login.sh"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/data/jenkins/jenkins_slave_home:/var/jenkins_home"
+    entrypoint:
+      - sh
+      - -c
+      - |
+        chown -R jenkins:jenkins /var/jenkins_home &&
+        chmod -R 755 /var/jenkins_home &&
+        sh /install.sh &&
+        sh /node.sh &&
+        setup-sshd &&
+        echo 'Running node.sh'

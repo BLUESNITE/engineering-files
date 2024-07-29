@@ -1,0 +1,26 @@
+# docker exec python-codechat /bin/sh /project-update.sh
+services:
+  python-codechat:
+    image: python:3.9.19-slim
+    container_name: python-codechat
+    environment:
+      - GIT_USERNAME=jeongzmin%40plateer.com
+      - GIT_PASSWORD=456456aa
+      - MAIN_SCRIPT=main.py
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./volume-files/git-install.sh:/git-install.sh
+      - ./volume-files/python-start.sh:/python-start.sh
+      - ./volume-files/project-update.sh:/project-update.sh
+      - /data/python-codechat-data:/home/codechatbotforx2beedemo
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        chmod +x /git-install.sh
+        chmod +x /python-start.sh
+        chmod +x /project-update.sh
+        #/git-install.sh
+        #/python-start.sh
+        tail -f /dev/null

@@ -1,0 +1,7 @@
+#!/bin/sh
+cd /home
+
+USERNAME=$GIT_USERNAME
+PASSWORD=$GIT_PASSWORD
+URL=$GIT_URL
+git clone https://$USERNAME:$PASSWORD@$URL

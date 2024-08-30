@@ -1,0 +1,36 @@
+services:
+  opensearch-bitnami-v1:
+    image: bitnami/opensearch:2.16.0
+    container_name: opensearch-bitnami-v1
+    volumes:
+      - "opensearch_data:/bitnami/opensearch"
+    environment:
+      - OPENSEARCH_HEAP_SIZE=4096m
+      - OPENSEARCH_PASSWORD=X2commerce!1
+      - OPENSEARCH_DASHBOARDS_PASSWORD=X2commerce!1
+      - OPENSEARCH_PLUGINS=analysis-nori
+        #      - OPENSEARCH_CONF_FILE=
+  opensearch-dashboards-bitnami-v1:
+    image: bitnami/opensearch-dashboards:2.16.0
+    container_name: opensearch-dashboards-bitnami-v1
+    ports:
+      - "5607:5601"
+    environment:
+      - OPENSEARCH_DASHBOARDS_OPENSEARCH_URL=http://opensearch-bitnami-v1:9200
+    volumes:
+      - "opensearch_dashboards_data:/bitnami/opensearch-dashboards"
+    depends_on:
+      - opensearch-bitnami-v1
+volumes:
+  opensearch_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-data-bit/data
+  opensearch_dashboards_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-data-bit/board

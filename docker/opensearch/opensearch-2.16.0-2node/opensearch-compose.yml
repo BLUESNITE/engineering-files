@@ -32,6 +32,14 @@ services:
       - |
         /usr/share/opensearch/opensearch-plungins-install.sh
         /usr/share/opensearch/opensearch-docker-entrypoint.sh
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: "8.0"
+    #      memory: "16g"
+    #    reservations:
+    #      cpus: "4.0"
+    #      memory: "8g"    
     networks:
       - opensearch-net
   opensearch-node2:
@@ -64,6 +72,14 @@ services:
       - |
         /usr/share/opensearch/opensearch-plungins-install.sh
         /usr/share/opensearch/opensearch-docker-entrypoint.sh
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: "8.0"
+    #      memory: "16g"
+    #    reservations:
+    #      cpus: "4.0"
+    #      memory: "8g"
     networks:
       - opensearch-net
   opensearch-dashboards:

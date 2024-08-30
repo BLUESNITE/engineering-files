@@ -8,7 +8,7 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true
-      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m  # 50% of system RAM
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m  # 50% of system RAM 3072
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
       - "DISABLE_INSTALL_DEMO_CONFIG=true" # Prevents execution of bundled demo script which installs demo certificates and security configurations to OpenSearch
       - "DISABLE_SECURITY_PLUGIN=true" # Disables Security plugin
@@ -35,11 +35,11 @@ services:
     #deploy:
     #  resources:
     #    limits:
-    #      cpus: "8.0"
-    #      memory: "16g"
-    #    reservations:
     #      cpus: "4.0"
-    #      memory: "8g"    
+    #      memory: "8g"
+    #    reservations:
+    #      cpus: "2.0"
+    #      memory: "4g"    
     networks:
       - opensearch-net
   opensearch-node2:
@@ -51,7 +51,7 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true
-      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m #3072
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
       - "DISABLE_INSTALL_DEMO_CONFIG=true" # Prevents execution of bundled demo script which installs demo certificates and security configurations to OpenSearch
       - "DISABLE_SECURITY_PLUGIN=true" # Disables Security plugin
@@ -75,11 +75,11 @@ services:
     #deploy:
     #  resources:
     #    limits:
-    #      cpus: "8.0"
-    #      memory: "16g"
-    #    reservations:
     #      cpus: "4.0"
     #      memory: "8g"
+    #    reservations:
+    #      cpus: "2.0"
+    #      memory: "4g"    
     networks:
       - opensearch-net
   opensearch-dashboards:

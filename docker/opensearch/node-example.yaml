@@ -1,0 +1,23 @@
+version: '3'
+services:
+  opensearch-node3:
+    image: opensearchproject/opensearch:2.16.0
+    container_name: opensearch-node3
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node3
+      - discovery.seed_hosts=기존노드_IP1,기존노드_IP2  # 예: 192.168.1.10,192.168.1.11
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g
+      - "DISABLE_SECURITY_PLUGIN=true"  # 기존 설정과 동일하게 보안 플러그인 비활성화
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch-data3:/usr/share/opensearch/data
+    ports:
+      - 9200:9200  # 필요에 따라 포트 변경
+    network_mode: "host"  # 호스트 네트워크 사용으로 간단하게 설정
+volumes:
+  opensearch-data3:

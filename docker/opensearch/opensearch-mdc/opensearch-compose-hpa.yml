@@ -1,0 +1,186 @@
+version: '3.8'
+
+# opensearch.yml
+# index.number_of_replicas: 1 # 로운 인덱스가 생성될 때 기본적으로 복제본 수가 1로 설정되어 데이터의 가용성이 향상
+
+# 공통 환경 변수 설정 (YAML 앵커 사용)
+x-opensearch-environment: &opensearch-environment
+  cluster.name: opensearch-cluster
+  bootstrap.memory_lock: "true"
+  OPENSEARCH_JAVA_OPTS: "-Xms4g -Xmx4g"
+  OPENSEARCH_INITIAL_ADMIN_PASSWORD: "X2commerce!1"
+
+services:
+  opensearch-m1:
+    image: opensearchproject/opensearch:2.17.0
+    container_name: opensearch-m1
+    environment:
+      <<: *opensearch-environment
+      node.name: opensearch-m1
+      node.roles: '[cluster_manager]'
+      discovery.seed_hosts: opensearch-m1,opensearch-d1,opensearch-d2
+      cluster.initial_cluster_manager_nodes: opensearch-m1,opensearch-d1,opensearch-d2
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data-m1:/usr/share/opensearch/data
+      - ./conf/opensearch-plugins-install.sh:/usr/share/opensearch/opensearch-plugins-install.sh
+    ports:
+      - 9200:9200
+      - 9600:9600
+    networks:
+      - opensearch-net
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        /usr/share/opensearch/opensearch-plugins-install.sh
+        /usr/share/opensearch/opensearch-docker-entrypoint.sh
+
+  opensearch-d1:
+    image: opensearchproject/opensearch:2.17.0
+    container_name: opensearch-d1
+    environment:
+      <<: *opensearch-environment
+      node.name: opensearch-d1
+        #node.roles: '[cluster_manager,data]'
+      discovery.seed_hosts: opensearch-m1,opensearch-d1,opensearch-d2
+      cluster.initial_cluster_manager_nodes: opensearch-m1,opensearch-d1,opensearch-d2
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data1:/usr/share/opensearch/data
+      - ./conf/opensearch-plugins-install.sh:/usr/share/opensearch/opensearch-plugins-install.sh
+    networks:
+      - opensearch-net
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        /usr/share/opensearch/opensearch-plugins-install.sh
+        /usr/share/opensearch/opensearch-docker-entrypoint.sh
+
+  opensearch-d2:
+    image: opensearchproject/opensearch:2.17.0
+    container_name: opensearch-d2
+    environment:
+      <<: *opensearch-environment
+      node.name: opensearch-d2
+        #node.roles: '[cluster_manager,data]'
+      discovery.seed_hosts: opensearch-m1,opensearch-d1,opensearch-d2
+      cluster.initial_cluster_manager_nodes: opensearch-m1,opensearch-d1,opensearch-d2
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data2:/usr/share/opensearch/data
+      - ./conf/opensearch-plugins-install.sh:/usr/share/opensearch/opensearch-plugins-install.sh
+    networks:
+      - opensearch-net
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        /usr/share/opensearch/opensearch-plugins-install.sh
+        /usr/share/opensearch/opensearch-docker-entrypoint.sh
+
+  opensearch-c1:
+    image: opensearchproject/opensearch:2.17.0
+    container_name: opensearch-c1
+    environment:
+      <<: *opensearch-environment
+      node.name: opensearch-c1
+      node.roles: '[]'
+      discovery.seed_hosts: opensearch-m1,opensearch-d1,opensearch-d2
+      cluster.initial_cluster_manager_nodes: opensearch-m1,opensearch-d1,opensearch-d2
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data-c1:/usr/share/opensearch/data
+      - ./conf/opensearch-plugins-install.sh:/usr/share/opensearch/opensearch-plugins-install.sh
+    networks:
+      - opensearch-net
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        /usr/share/opensearch/opensearch-plugins-install.sh
+        /usr/share/opensearch/opensearch-docker-entrypoint.sh
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-c1:9200"]'
+    networks:
+      - opensearch-net
+
+# 볼륨 설정
+volumes:
+  opensearch-data1:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data-d1
+  opensearch-data2:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data-d2
+  opensearch-data-c1:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data-c1
+  opensearch-data-m1:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data-m1
+
+# 네트워크 설정
+networks:
+  opensearch-net:

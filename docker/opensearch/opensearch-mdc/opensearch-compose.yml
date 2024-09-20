@@ -9,7 +9,7 @@ services:
       - discovery.seed_hosts=opensearch-d1,opensearch-d2,opensearch-m1,opensearch-c1
       - cluster.initial_cluster_manager_nodes=opensearch-m1,opensearch-d1,opensearch-d2
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g" #JVM 힙 메모리는 컨테이너 메모리의 50%로 설정하는 것이 권장
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
     deploy:
       resources:
@@ -35,10 +35,10 @@ services:
     environment:
       - cluster.name=opensearch-cluster
       - node.name=opensearch-d1
-      - discovery.seed_hosts=opensearch-d1,opensearch-d2
+      - discovery.seed_hosts=opensearch-d1,opensearch-d2,opensearch-m1,opensearch-c1
       - cluster.initial_cluster_manager_nodes=opensearch-d1,opensearch-d2,opensearch-m1
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
     ulimits:
       memlock:
@@ -61,10 +61,10 @@ services:
     environment:
       - cluster.name=opensearch-cluster
       - node.name=opensearch-d2
-      - discovery.seed_hosts=opensearch-d1,opensearch-d2
+      - discovery.seed_hosts=opensearch-d1,opensearch-d2,opensearch-m1,opensearch-c1
       - cluster.initial_cluster_manager_nodes=opensearch-d1,opensearch-d2,opensearch-m1
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
     ulimits:
       memlock:
@@ -91,7 +91,7 @@ services:
       - node.roles=[]
       - discovery.seed_hosts=opensearch-d1,opensearch-d2,opensearch-m1,opensearch-c1
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
     deploy:
       resources:
@@ -116,7 +116,8 @@ services:
     expose:
       - "5601"
     environment:
-      OPENSEARCH_HOSTS: '["https://opensearch-d2:9200","https://opensearch-d1:9200","https://opensearch-c1:9200","https://opensearch-m1:9200"]'
+      OPENSEARCH_HOSTS: '["https://opensearch-c1:9200"]' # 조정노드로만 설정가능
+      #OPENSEARCH_HOSTS: '["https://opensearch-d2:9200","https://opensearch-d1:9200","https://opensearch-c1:9200","https://opensearch-m1:9200"]'
     networks:
       - opensearch-net
 

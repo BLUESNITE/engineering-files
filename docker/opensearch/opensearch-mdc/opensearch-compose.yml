@@ -1,0 +1,150 @@
+services:
+  opensearch-m1:
+    image: opensearchproject/opensearch:2.17.0
+    container_name: opensearch-m1
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.roles=[cluster_manager]
+      - node.name=opensearch-m1
+      - discovery.seed_hosts=opensearch-d1,opensearch-d2,opensearch-m1,opensearch-c1
+      - cluster.initial_cluster_manager_nodes=opensearch-m1,opensearch-d1,opensearch-d2
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data-m1:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600
+    networks:
+      - opensearch-net
+  opensearch-d1:
+    image: opensearchproject/opensearch:2.17.0
+    container_name: opensearch-d1
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-d1
+      - discovery.seed_hosts=opensearch-d1,opensearch-d2
+      - cluster.initial_cluster_manager_nodes=opensearch-d1,opensearch-d2,opensearch-m1
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+    volumes:
+      - opensearch-data1:/usr/share/opensearch/data
+    networks:
+      - opensearch-net
+  opensearch-d2:
+    image: opensearchproject/opensearch:2.17.0
+    container_name: opensearch-d2
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-d2
+      - discovery.seed_hosts=opensearch-d1,opensearch-d2
+      - cluster.initial_cluster_manager_nodes=opensearch-d1,opensearch-d2,opensearch-m1
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+    volumes:
+      - opensearch-data2:/usr/share/opensearch/data
+    networks:
+      - opensearch-net
+  opensearch-c1:
+    image: opensearchproject/opensearch:2.17.0
+    container_name: opensearch-c1
+    environment:
+      - cluster.name=opensearch-cluster
+      - cluster.initial_cluster_manager_nodes=opensearch-m1,opensearch-d1,opensearch-d2
+      - node.name=opensearch-c1
+      - node.roles=[]
+      - discovery.seed_hosts=opensearch-d1,opensearch-d2,opensearch-m1,opensearch-c1
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data-c1:/usr/share/opensearch/data
+    networks:
+      - opensearch-net
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch-d2:9200","https://opensearch-d1:9200","https://opensearch-c1:9200","https://opensearch-m1:9200"]'
+    networks:
+      - opensearch-net
+
+volumes:
+  opensearch-data1:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data-d1
+  opensearch-data2:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data-d2
+  opensearch-data-c1:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data-c1
+  opensearch-data-m1:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data-m1
+
+networks:
+  opensearch-net:

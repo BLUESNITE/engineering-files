@@ -8,7 +8,7 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true
-      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m  # 50% of system RAM 1536
+      - OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m # 50% of system RAM 1536
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
       - "DISABLE_INSTALL_DEMO_CONFIG=true" # Prevents execution of bundled demo script which installs demo certificates and security configurations to OpenSearch
       - "DISABLE_SECURITY_PLUGIN=true" # Disables Security plugin
@@ -32,14 +32,14 @@ services:
       - |
         /usr/share/opensearch/opensearch-plungins-install.sh
         /usr/share/opensearch/opensearch-docker-entrypoint.sh
-    #deploy:
-    #  resources:
-    #    limits:
-    #      cpus: "4.0"
-    #      memory: "8g"
-    #    reservations:
-    #      cpus: "2.0"
-    #      memory: "4g"    
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: "8g"
+        reservations:
+          cpus: "2.0"
+          memory: "4g"
     networks:
       - opensearch-net
   opensearch-node2:
@@ -51,8 +51,8 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true
-      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m #1536
-      # - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g -XX:+UseG1GC 
+      - OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m #1536
+      # - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g -XX:+UseG1GC
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
       - "DISABLE_INSTALL_DEMO_CONFIG=true" # Prevents execution of bundled demo script which installs demo certificates and security configurations to OpenSearch
       - "DISABLE_SECURITY_PLUGIN=true" # Disables Security plugin
@@ -73,14 +73,14 @@ services:
       - |
         /usr/share/opensearch/opensearch-plungins-install.sh
         /usr/share/opensearch/opensearch-docker-entrypoint.sh
-    #deploy:
-    #  resources:
-    #    limits:
-    #      cpus: "4.0"
-    #      memory: "8g"
-    #    reservations:
-    #      cpus: "2.0"
-    #      memory: "4g"    
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: "8g"
+        reservations:
+          cpus: "2.0"
+          memory: "4g"
     networks:
       - opensearch-net
   opensearch-dashboards:
@@ -112,3 +112,4 @@ volumes:
 
 networks:
   opensearch-net:
+

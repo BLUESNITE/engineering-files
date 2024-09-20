@@ -1,0 +1,98 @@
+version: '3'
+services:
+  opensearch-node3:
+    image: opensearchproject/opensearch:2.16.0
+    container_name: opensearch-node3
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node3
+      - discovery.seed_hosts=192.168.2.156:9221,192.168.2.156:9222,192.168.2.185:9223,192.168.2.185:9224,192.168.2.185:9225
+      - cluster.initial_cluster_manager_nodes=opensearch-node3,opensearch-node4,opensearch-node5
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_PLUGIN=true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch-data3:/usr/share/opensearch/data
+    ports:
+      - 9223:9200
+      - 9611:9600  # Performance Analyzer
+    networks:
+      - opensearch-net
+
+  opensearch-node4:
+    image: opensearchproject/opensearch:2.16.0
+    container_name: opensearch-node4
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node4
+      - discovery.seed_hosts=192.168.2.156:9221,192.168.2.156:9222,192.168.2.185:9223,192.168.2.185:9224,192.168.2.185:9225
+      - cluster.initial_cluster_manager_nodes=opensearch-node3,opensearch-node4,opensearch-node5
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_PLUGIN=true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch-data4:/usr/share/opensearch/data
+    ports:
+      - 9224:9200
+    networks:
+      - opensearch-net
+
+  opensearch-node5:
+    image: opensearchproject/opensearch:2.16.0
+    container_name: opensearch-node5
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node5
+      - discovery.seed_hosts=192.168.2.156:9221,192.168.2.156:9222,192.168.2.185:9223,192.168.2.185:9224,192.168.2.185:9225
+      - cluster.initial_cluster_manager_nodes=opensearch-node3,opensearch-node4,opensearch-node5
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=X2commerce!1
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_PLUGIN=true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch-data5:/usr/share/opensearch/data
+    ports:
+      - 9225:9200
+    networks:
+      - opensearch-net
+
+volumes:
+  opensearch-data3:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data3
+  opensearch-data4:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data4
+  opensearch-data5:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/opensearch-dir/data5
+
+networks:
+  opensearch-net:
+    external: true

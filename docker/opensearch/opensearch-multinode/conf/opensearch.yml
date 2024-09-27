@@ -46,4 +46,7 @@ node.max_local_storage_nodes: 3
 thread_pool.write.queue_size: 200000
 indices.memory.index_buffer_size: 20%
 
+index.number_of_shards: 1
+index.number_of_replicas: 1
+
 ######## End OpenSearch Security Demo Configuration ########

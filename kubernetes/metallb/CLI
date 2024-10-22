@@ -1,0 +1,2 @@
+sudo curl -fsSLo metallb.yaml https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+kubectl apply -f metallb.yaml

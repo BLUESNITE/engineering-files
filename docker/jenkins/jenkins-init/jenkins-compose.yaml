@@ -10,7 +10,7 @@ services:
     user: root
     container_name: jenkins
     environment:
-      <<: *opensearch-environment
+      <<: *jenkins-environment
       TZ: Asia/Seoul
     volumes:
       - "/data/jenkins_home:/var/jenkins_home"

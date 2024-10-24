@@ -1,17 +1,21 @@
-version: '3.8'
+x-opensearch-environment: &opensearch-environment
+  bootstrap.memory_lock: "true"
+  OPENSEARCH_JAVA_OPTS: "-Xms4g -Xmx4g"
+  OPENSEARCH_INITIAL_ADMIN_PASSWORD: "X2commerce!1"
+  plugins.security.ssl.http.enabled: false
 
 services:
   opensearch-node1:
     image: opensearchproject/opensearch:latest
     container_name: opensearch-node1
     environment:
-      - cluster.name=opensearch-cluster
-      - node.name=opensearch-node1
-      - discovery.seed_hosts=192.168.2.150,192.168.2.151 # 각 가상 머신의 IP 주소 입력
-      - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
-      - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+      <<: *opensearch-environment
+      cluster.initial_cluster_manager_nodes: opensearch-node1,opensearch-node2
+      node.name: opensearch-node1
+      network.host: 0.0.0.0
+      plugins.security.disabled: "true"
+      discovery.seed_hosts: 192.168.2.150:9300,192.168.2.151:9300
+      OPENSEARCH_SECURITY_ENABLED: "false"
     ulimits:
       memlock:
         soft: -1
@@ -21,11 +25,23 @@ services:
         hard: 65536
     volumes:
       - opensearch-data1:/usr/share/opensearch/data
-    ports:
-      - 9200:9200
-      - 9600:9600
-    networks:
-      - opensearch-net
+      - ./conf/opensearch-plugin-install.sh:/usr/share/opensearch/opensearch-plugin-install.sh
+    network_mode: "host"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        /usr/share/opensearch/opensearch-plugin-install.sh
+        /usr/share/opensearch/opensearch-docker-entrypoint.sh
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    network_mode: "host"
+    environment:
+      OPENSEARCH_HOSTS: '["http://192.168.2.150:9200","http://192.168.2.151:9200"]' # 각 노드의 IP 주소 입력
+      OPENSEARCH_SECURITY_ENABLED: "false"
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: 'true'
 
 volumes:
   opensearch-data1:
@@ -33,8 +49,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /data/opensearch-dir/data-d1
-
-networks:
-  opensearch-net:
-    external: true
+      device: /home/tech/data/opensearch-dir/data-d1

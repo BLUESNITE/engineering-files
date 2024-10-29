@@ -1,5 +1,5 @@
 x-jenkins-environment: &jenkins-environment
-  ARGOCD_SERVER: "192.168.1.254:10031"
+  ARGOCD_SERVER: "192.168.2.172:10030"
   ARGOCD_USERNAME: "admin"
   ARGOCD_PASSWORD: "X2commerce!1"
 

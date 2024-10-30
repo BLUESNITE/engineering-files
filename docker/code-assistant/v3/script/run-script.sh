@@ -8,6 +8,6 @@ cd /app/
 
 cd /home/${CONTAINER_NAME}
 
-python $PYTHON_SCRIPT
+python3.11 $PYTHON_FLASK
 
 echo "end run-script.sh"

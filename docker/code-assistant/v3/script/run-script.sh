@@ -1,7 +1,13 @@
-cd /home${CONTAINER_NAME}
-python -m venv venv
+cd /home/${CONTAINER_NAME}
 
-# requirements
+cp requirements.txt /app/
+
+cd /app/
+
+/app/venv/bin/pip install -r requirements.txt
+
+cd /home/${CONTAINER_NAME}
 
 python $PYTHON_SCRIPT
+
 echo "end run-script.sh"

@@ -1,29 +1,20 @@
-x-codeassistant-environment: &codeassistant-environment
-  services.env.filename: .plateer.env
-
-services: 
-  # ${SERVICE_NAME:-code-assistant-python}:
-    container_name: code-assistant-python-plateer
-    environment:
-      <<: *codeassistant-environment
+services:
+  code-assistant-python:
+    container_name: ${CONTAINER_NAME} #code-assistant-python-plateer
     build:
       context: .
-      env_file: ${services.env.filename}
-#      args:
-#        TORCH_CUDA_ARCH_LIST: ${TORCH_CUDA_ARCH_LIST:-7.5}
+    env_file:
+      - ${ENV_FILE_PATH} # ./env/.plateer.env
     ports:
       - "${HOST_PORT:-8502}:${CONTAINER_PORT:-8501}"
-    #volumes:
-    #  - ./git-script.sh:/git-script.sh
-    #  - ./run-script.sh:/run-script.sh
-    #  - /data/python-codechat-2-data:/home/codechatbotforx2beedemo
+    volumes:
+      - ./script:/script
+      - ../data/${CONTAINER_NAME}:/home/${CONTAINER_NAME}
     entrypoint:
       - /bin/sh
       - -c
       - |
-        tail -f /dev/null
-
-#        chmod +x /git-script.sh
-#        chmod +x /run-script.sh
-#        /git-script.sh
-#        /run-script.sh
+        chmod 755 /script/permissions.sh
+        /script/permissions.sh
+        /script/git-script.sh
+        /script/entrypoint.sh

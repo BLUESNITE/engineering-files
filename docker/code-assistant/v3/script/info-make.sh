@@ -18,4 +18,4 @@ python3.11 $PYTHON_INFO_MAKEER
 
 echo "$PYTHON_FLASK 재실행 전 5초 Sleep"
 
-python3.11 $PYTHON_FLASK
+python $PYTHON_FLASK

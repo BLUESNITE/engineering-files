@@ -5,7 +5,7 @@ services:
     hostname:
       localhost
       #- 192.168.2.246
-      #- "cronicle-stg.x2bee.com"
+      #- "cronicle-stg.x2bee.com" test
     user: "root"
     ports:
       - "8086:3012"

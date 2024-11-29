@@ -15,6 +15,8 @@ services:
       resources:
         limits:
           memory: 8g
+        reservations:
+          memory: 4g # java opts 만큼
     ulimits:
       memlock:
         soft: -1

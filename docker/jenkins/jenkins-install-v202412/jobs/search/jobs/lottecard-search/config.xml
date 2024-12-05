@@ -1,0 +1,68 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1459.v6c531091efcd">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.19">
+          <name>BRANCH</name>
+          <description>Git Default BRANCH &apos;lotte_guide&apos;</description>
+          <uuid>67003831-d189-497b-92ab-fc6625ebfe29</uuid>
+          <type>PT_BRANCH</type>
+          <branch></branch>
+          <tagFilter>*</tagFilter>
+          <branchFilter>.*lotte.*</branchFilter>
+          <sortMode>DESCENDING_SMART</sortMode>
+          <defaultValue>lotte_guide</defaultValue>
+          <selectedValue>NONE</selectedValue>
+          <useRepository>http://gitlab.x2bee.com/moon-project/moon-next-publish.git</useRepository>
+          <quickFilterEnabled>false</quickFilterEnabled>
+          <listSize>5</listSize>
+          <requiredParameter>false</requiredParameter>
+        </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PRJ_TARGET</name>
+          <defaultValue>dev</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@3975.v567e2a_1ffa_22">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.6.0">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>http://gitlab.x2bee.com/tech-team/x2bee-pipeline.git</url>
+          <credentialsId>onprem-gitlab-jenkins</credentialsId>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/main</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+      <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+      <submoduleCfg class="empty-list"/>
+      <extensions>
+        <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+          <relativeTargetDir>scm</relativeTargetDir>
+        </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+      </extensions>
+    </scm>
+    <scriptPath>jenkins/Jenkinsfile</scriptPath>
+    <lightweight>true</lightweight>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

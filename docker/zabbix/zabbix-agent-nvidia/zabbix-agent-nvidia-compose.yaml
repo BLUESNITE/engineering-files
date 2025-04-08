@@ -1,0 +1,21 @@
+#파일 이 두개인 이유는 서버 환경에 따라 적용되지 않는 경우가 나타나기 때문
+version: "3.3"
+services:
+  zabbix-agent-nvidia:
+    build:
+      context: /home/tech/data/zabbix
+    container_name: zabbix-agent-nvidia
+    environment:
+      - ZBX_HOSTNAME=192.168.2.243
+      - ZBX_SERVER_HOST=192.168.2.249
+    init: true
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    volumes:
+      - ./nvidia-gpu:/nvidia-gpu
+      - /usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:ro
+networks: {}

@@ -1,0 +1,24 @@
+services:
+  web-view-agent-v2:
+    # build:
+    #  context: .
+    image: gezp/ubuntu-desktop:22.04-cu12.4.1
+    container_name: web-view-agent-v2
+    restart: on-failure
+    ports:
+      - "10122:22"      # SSH 포트
+      - "14100:4000"    # VNC 포트
+      - "15100:5000"    # VNC 포트
+    environment:
+      - USER=tech
+      - PASSWORD=tech
+      - GID=${GID:-1000}      # 현재 GID 사용 설정되지 않으면 기본값 1000 사용
+      - UID=${UID:-1000}      # 현재 UID 사용 설정되지 않으면 기본값 1000 사용
+      - REMOTE_DESKTOP=kasmvnc
+      - DISPLAY=:1      # VNC 화면 설정
+    volumes:
+      - /home/tech/data/web-view-agent-v2/data:/data  # 필요한 데이터를 공유할 수 있는 볼륨
+      - ./custom_startup.sh:/docker_config/custom_startup.sh
+    shm_size: 1024m  # 공유 메모리 크기 설정
+    runtime: nvidia  # NVIDIA GPU 사용 설정
+    privileged: true  # 권한 문제를 해결하기 위한 설정

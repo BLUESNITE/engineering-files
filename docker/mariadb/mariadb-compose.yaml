@@ -1,0 +1,72 @@
+version: "3"
+
+services:
+  mariadb-master:
+    image: mariadb:11.4.5
+    container_name: mariadb-master
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: x2bee_main12#$
+      MARIADB_DATABASE: x2bee_main
+      MARIADB_USER: x2bee_main
+      MARIADB_PASSWORD: x2bee_main12#$
+      MARIADB_REPLICATION_USER: x2bee_main_repl
+      MARIADB_REPLICATION_PASSWORD: x2bee_main12#$_repl
+    volumes:
+      - master_data:/var/lib/mysql
+    command: >
+      --server-id=1
+      --log-bin=mysql-bin
+      --binlog-do-db=x2bee_main
+    networks:
+      - mariadbnet
+
+  mariadb-slave1:
+    image: mariadb:11.4.5
+    container_name: mariadb-slave1
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: x2bee_main12#$
+      MARIADB_REPLICATION_USER: x2bee_main_repl
+      MARIADB_REPLICATION_PASSWORD: x2bee_main12#$_repl
+    depends_on:
+      - mariadb-master
+    volumes:
+      - slave1_data:/var/lib/mysql
+    command: >
+      --server-id=2
+      --read-only=1
+    networks:
+      - mariadbnet
+
+  mariadb-slave2:
+    image: mariadb:11.4.5
+    container_name: mariadb-slave2
+    restart: unless-stopped
+    ports:
+      - "3308:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: x2bee_main12#$
+      MARIADB_REPLICATION_USER: x2bee_main_repl
+      MARIADB_REPLICATION_PASSWORD: x2bee_main12#$_repl
+    depends_on:
+      - mariadb-master
+    volumes:
+      - slave2_data:/var/lib/mysql
+    command: >
+      --server-id=3
+      --read-only=1
+    networks:
+      - mariadbnet
+
+volumes:
+  master_data:
+  slave1_data:
+  slave2_data:
+
+networks:
+  mariadbnet:

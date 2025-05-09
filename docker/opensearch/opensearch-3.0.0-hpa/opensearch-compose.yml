@@ -11,7 +11,6 @@ x-opensearch-environment: &opensearch-environment
   OPENSEARCH_JAVA_OPTS: "-Xms16g -Xmx16g"
   OPENSEARCH_INITIAL_ADMIN_PASSWORD: "X2commerce!1"
   plugins.security.ssl.http.enabled: false
-  bootstrap.memory_lock: true
 
 services:
   opensearch-m1:

@@ -8,15 +8,15 @@ x-opensearch-environment: &opensearch-environment
   plugins.security.ssl.http.enabled: "false"
 
 services:
-  opensearch-m1:
+  opensearch-manager:
     image: opensearchproject/opensearch:3
-    container_name: opensearch-m1
+    container_name: opensearch-manager
     environment:
       <<: *opensearch-environment
-      node.name: opensearch-m1
+      node.name: opensearch-manager
       node.roles: '["cluster_manager"]'
-      discovery.seed_hosts: opensearch-m1,opensearch-d1,opensearch-d2
-      cluster.initial_cluster_manager_nodes: opensearch-m1,opensearch-d1,opensearch-d2
+      discovery.seed_hosts: opensearch-manager,opensearch-writer,opensearch-reader
+      cluster.initial_cluster_manager_nodes: opensearch-manager,opensearch-writer,opensearch-reader
     deploy:
       resources:
         limits:
@@ -39,14 +39,15 @@ services:
             /usr/share/opensearch/opensearch-plugin-install.sh &&
             /usr/share/opensearch/opensearch-docker-entrypoint.sh"
 
-  opensearch-d1:
+  opensearch-writer:
     image: opensearchproject/opensearch:3
-    container_name: opensearch-d1
+    container_name: opensearch-writer
     environment:
       <<: *opensearch-environment
-      node.name: opensearch-d1
-      discovery.seed_hosts: opensearch-m1,opensearch-d1,opensearch-d2
-      cluster.initial_cluster_manager_nodes: opensearch-m1,opensearch-d1,opensearch-d2
+      node.name: opensearch-writer
+      node.attr.role: writer
+      discovery.seed_hosts: opensearch-manager,opensearch-writer,opensearch-reader
+      cluster.initial_cluster_manager_nodes: opensearch-manager,opensearch-writer,opensearch-reader
     deploy:
       resources:
         limits:
@@ -71,14 +72,15 @@ services:
             /usr/share/opensearch/opensearch-plugin-install.sh &&
             /usr/share/opensearch/opensearch-docker-entrypoint.sh"
 
-  opensearch-d2:
+  opensearch-reader:
     image: opensearchproject/opensearch:3
-    container_name: opensearch-d2
+    container_name: opensearch-reader
     environment:
       <<: *opensearch-environment
-      node.name: opensearch-d2
-      discovery.seed_hosts: opensearch-m1,opensearch-d1,opensearch-d2
-      cluster.initial_cluster_manager_nodes: opensearch-m1,opensearch-d1,opensearch-d2
+      node.name: opensearch-reader
+      node.attr.role: reader
+      discovery.seed_hosts: opensearch-manager,opensearch-writer,opensearch-reader
+      cluster.initial_cluster_manager_nodes: opensearch-manager,opensearch-writer,opensearch-reader
     deploy:
       resources:
         limits:
@@ -103,47 +105,13 @@ services:
             /usr/share/opensearch/opensearch-plugin-install.sh &&
             /usr/share/opensearch/opensearch-docker-entrypoint.sh"
 
-  opensearch-c1:
-    image: opensearchproject/opensearch:3
-    container_name: opensearch-c1
-    environment:
-      <<: *opensearch-environment
-      node.name: opensearch-c1
-      node.roles: '[]'
-      discovery.seed_hosts: opensearch-m1,opensearch-d1,opensearch-d2
-      cluster.initial_cluster_manager_nodes: opensearch-m1,opensearch-d1,opensearch-d2
-    deploy:
-      resources:
-        limits:
-          memory: 24g
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    ports:
-      - 9200:9200
-      - 9600:9600
-    volumes:
-      - opensearch-data-c1:/usr/share/opensearch/data
-      - ./conf/opensearch-plugin-install.sh:/usr/share/opensearch/opensearch-plugin-install.sh
-    networks:
-      - opensearch-net
-    restart: always
-    command: >
-      sh -c "chmod +x /usr/share/opensearch/opensearch-plugin-install.sh &&
-            /usr/share/opensearch/opensearch-plugin-install.sh &&
-            /usr/share/opensearch/opensearch-docker-entrypoint.sh"
-
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:3
     container_name: opensearch-dashboards
     ports:
       - 5601:5601
     environment:
-      OPENSEARCH_HOSTS: '["http://opensearch-c1:9200"]'
+      OPENSEARCH_HOSTS: '["http://opensearch-reader:9200"]'
     networks:
       - opensearch-net
     restart: always
@@ -161,12 +129,6 @@ volumes:
       type: none
       o: bind
       device: /data/opensearch-dir/data-d2
-  opensearch-data-c1:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /data/opensearch-dir/data-c1
   opensearch-data-m1:
     driver: local
     driver_opts:

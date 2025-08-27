@@ -1,0 +1,50 @@
+x-jenkins-environment: &jenkins-environment
+  JENKINS_USER: "jenkins"
+  JENKINS_PASSWORD: "jenkins"
+  TOOLS_MAVEN_NAME: "Maven 3.5.4"
+  TOOLS_MAVEN_VERSION: "3.5.4"
+  CREDENTIAL_GITLAB_JENKINS: "gitlab-jenkins"
+  CREDENTIAL_GITLAB_JENKINS_USER: "jeongzmin"
+  CREDENTIAL_GITLAB_JENKINS_PASSWORD: "456456aa"
+  CREDENTIAL_DOCKER_JENKINS: "docker-jenkins"
+  CREDENTIAL_DOCKER_JENKINS_USER: "admin"
+  CREDENTIAL_DOCKER_JENKINS_PASSWORD: "X2commerce!1"
+
+services:
+  jenkins:
+    image: jenkins/jenkins:jdk21
+    restart: always
+    user: root
+    container_name: jenkins
+    environment:
+      <<: *jenkins-environment
+      TZ: Asia/Seoul
+    volumes:
+      - "/Users/blue/data/jenkins_home:/var/jenkins_home"
+      - "/usr/local/bin/helm:/usr/local/bin/helm"
+      - "/usr/bin/argocd:/usr/bin/argocd"
+      - "/usr/bin/docker:/usr/bin/docker"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./groovy:/var/jenkins_home/init.groovy.d"
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        # ArgoCD CLI 다운로드 및 설치
+        cd /usr/local/bin/ && \
+        curl -LO https://github.com/argoproj/argo-cd/releases/download/v2.11.2/argocd-linux-amd64 && \
+        mv argocd-linux-amd64 argocd && \
+        chmod 755 /usr/local/bin/argocd && \
+        echo "ArgoCD CLI installed." && \
+        argocd version
+
+        # Jenkins CLI 설치
+        cd /home
+        apt-get update && apt-get install -y curl
+        curl -o jenkins-cli.jar http://localhost:8080/jnlpJars/jenkins-cli.jar
+
+        #  Jenkins 기본 실행 명령어
+        /bin/tini -- /usr/local/bin/jenkins.sh
